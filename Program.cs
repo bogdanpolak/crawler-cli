@@ -124,13 +124,23 @@ internal abstract class CrawlerRequests
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-        request.Headers.Add("Origin", FordTechServiceUrl);
-        request.Headers.Add("Referer", FordTechServiceUrl);
-        request.Headers.Add("Accept", "*/*");
-        request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
-        request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0");
+        // request.Headers.Add("Origin", FordTechServiceUrl);
+        // request.Headers.Add("Referer", FordTechServiceUrl);
+        // request.Headers.Add("Accept", "*/*");
+        // request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
+        // request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0");
+        // request.Headers.Add("Connection", "keep-alive");
+        // request.Headers.Add("Accept-Encoding", "*");
+        request.Headers.Add("Host", "www.fordtechservice.dealerconnection.com");
+        request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
+        request.Headers.Add("Accept", "text/css,*/*;q=0.1");
+        request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
+        request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
-        request.Headers.Add("Accept-Encoding", "*");
+        request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
+        request.Headers.Add("Sec-Fetch-Dest", "style");
+        request.Headers.Add("Sec-Fetch-Mode", "no-cors");
+        request.Headers.Add("Sec-Fetch-Site", "same-origin");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
