@@ -13,18 +13,19 @@ Console.WriteLine(data);
 
 Console.WriteLine("--------------------------------------------------------------------------");
 Console.WriteLine($"[ (Ford Book Crawler) Book for vehicleId={modelId}. {year} {modelName} ]");
-var fordPublication = await CrawlerRequests.GetPublication(modelId, year, modelName);
-Console.WriteLine(JsonSerializer.Serialize(fordPublication, new JsonSerializerOptions { WriteIndented = true }));
+var fordBook = await CrawlerRequests.GetPublication(modelId, year, modelName);
+Console.WriteLine(JsonSerializer.Serialize(fordBook, new JsonSerializerOptions { WriteIndented = true }));
 
 Console.WriteLine("--------------------------------------------------------------------------");
 Console.WriteLine($"[ (Ford Book Crawler) Table of Content ]");
-var procedureIds = await CrawlerRequests.GetProcedureList(fordPublication);
+var procedureIds = await CrawlerRequests.GetProcedureList(fordBook);
 Console.WriteLine($"OemProcedureIds = [{string.Join(", ", procedureIds.Take(50))}, ...]");
 Console.WriteLine($"Length = {procedureIds.Count}");
 
 Console.WriteLine("--------------------------------------------------------------------------");
 Console.WriteLine($"[ (Ford Book Crawler) Procedure Css ]");
-var css = await CrawlerRequests.GetCssAsync("https://www.fordtechservice.dealerconnection.com/Content/pts.desktop.publications.css");
+var css = await CrawlerRequests.GetCssAsync(
+    "https://www.fordtechservice.dealerconnection.com/Content/pts.desktop.publications.css");
 Console.WriteLine(css[0 .. 200]);
 Console.WriteLine($"Length = {css.Length}");
 
@@ -62,7 +63,7 @@ internal abstract class CrawlerRequests
         return responseText;
     }
 
-    public static async Task<FordVehiclePublication> GetPublication(string vehicleId, string year, string modelName)
+    public static async Task<FordBookPub> GetPublication(string vehicleId, string year, string modelName)
     {
         var url = $"{FordTechServiceUrl}/publication/Book/workshop/{vehicleId}?model={modelName}&modelYear={year}";
 
@@ -92,7 +93,7 @@ internal abstract class CrawlerRequests
         response.EnsureSuccessStatusCode();
         var html = await response.Content.ReadAsStringAsync();
 
-        var fordBookResponse = FordVehiclePublication.Parse(html);
+        var fordBookResponse = FordBookPub.Parse(html);
         return fordBookResponse;
     }
 
@@ -142,7 +143,7 @@ internal abstract class CrawlerRequests
         return css;
     }
 
-    public static async Task<List<string>> GetProcedureList(FordVehiclePublication book)
+    public static async Task<List<string>> GetProcedureList(FordBookPub book)
     {
         var baseUrl = book.PublicationBookTreeAndCoverBase;
         var url = $"{baseUrl}?bookTitle={book.BookTitle}&WiringBookTitle={book.WiringBookTitle}";

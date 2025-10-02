@@ -2,7 +2,7 @@
 
 namespace CrawlerHttpCLI;
 
-public class FordVehiclePublication
+public class FordBookPub
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public string PublicationBookTreeAndCoverBase { get; set; }
@@ -34,9 +34,9 @@ public class FordVehiclePublication
     /// Populates all the attributes based on the html string
     /// </summary>
     /// <param name="html">html of the workshop page as a string</param>
-    public static FordVehiclePublication Parse(string html)
+    public static FordBookPub Parse(string html)
     {
-        FordVehiclePublication fordVehiclePublication = new FordVehiclePublication();
+        FordBookPub fordBookPub = new FordBookPub();
         Func<Regex, int, string> regexFind = (regex, groupnum) =>
         {
             var match = regex.Match(html);
@@ -48,143 +48,143 @@ public class FordVehiclePublication
         };
 
         // PublicationBookTreeAndCoverBase
-        fordVehiclePublication.PublicationBookTreeAndCoverBase = regexFind(
+        fordBookPub.PublicationBookTreeAndCoverBase = regexFind(
             new Regex(@"publicationBookTreeAndCoverBase\s*=\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // PublicationProcContentBase
-        fordVehiclePublication.PublicationProcContentBase = regexFind(
+        fordBookPub.PublicationProcContentBase = regexFind(
             new Regex(@"publicationProcContentBase\s*=\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // BookCode
-        fordVehiclePublication.BookCode = regexFind(
+        fordBookPub.BookCode = regexFind(
             new Regex(@"bookcode\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // VehicleId
-        fordVehiclePublication.VehicleId = regexFind(
+        fordBookPub.VehicleId = regexFind(
             new Regex(@"vehicleId\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // ModelYear
-        fordVehiclePublication.ModelYear = regexFind(
+        fordBookPub.ModelYear = regexFind(
             new Regex(@"modelYear\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // ChannelId
-        fordVehiclePublication.ChannelId = regexFind(
+        fordBookPub.ChannelId = regexFind(
             new Regex(@"channelId\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // BookType
-        fordVehiclePublication.BookType = regexFind(
+        fordBookPub.BookType = regexFind(
             new Regex(@"booktype\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // WiringBookTitle
-        fordVehiclePublication.WiringBookTitle = regexFind(
+        fordBookPub.WiringBookTitle = regexFind(
             new Regex(@"WiringBookTitle\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // WiringBookCode
-        fordVehiclePublication.WiringBookCode = regexFind(
+        fordBookPub.WiringBookCode = regexFind(
             new Regex(@"WiringBookCode\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // BookTitle
-        fordVehiclePublication.BookTitle = regexFind(
+        fordBookPub.BookTitle = regexFind(
             new Regex(@"\sbookTitle\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Country
-        fordVehiclePublication.Country = regexFind(
+        fordBookPub.Country = regexFind(
             new Regex(@"country\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Language
-        fordVehiclePublication.Language = regexFind(
+        fordBookPub.Language = regexFind(
             new Regex(@"language\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // ContentMarket
-        fordVehiclePublication.ContentMarket = regexFind(
+        fordBookPub.ContentMarket = regexFind(
             new Regex(@"contentmarket\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // ContentLanguage
-        fordVehiclePublication.ContentLanguage = regexFind(
+        fordBookPub.ContentLanguage = regexFind(
             new Regex(@"contentlang\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // LanguageOdysseyCode
-        fordVehiclePublication.LanguageOdysseyCode = regexFind(
+        fordBookPub.LanguageOdysseyCode = regexFind(
             new Regex(@"languageOdysseyCode\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Category
-        fordVehiclePublication.Category = regexFind(
+        fordBookPub.Category = regexFind(
             new Regex(@"categoryId\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // CategoryDescription
-        fordVehiclePublication.CategoryDescription = regexFind(
+        fordBookPub.CategoryDescription = regexFind(
             new Regex(@"categorydesc\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Origin
-        fordVehiclePublication.Origin = regexFind(
+        fordBookPub.Origin = regexFind(
             new Regex(@"origin\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // IsMobile
-        fordVehiclePublication.IsMobile = regexFind(
+        fordBookPub.IsMobile = regexFind(
             new Regex(@"isMobile\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // UserType
-        fordVehiclePublication.UserType = regexFind(
+        fordBookPub.UserType = regexFind(
             new Regex(@"usertype\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Adt
-        fordVehiclePublication.Adt = regexFind(
+        fordBookPub.Adt = regexFind(
             new Regex(@"adt\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // DiagTool
-        fordVehiclePublication.DiagTool = regexFind(
+        fordBookPub.DiagTool = regexFind(
             new Regex(@"diagTool\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
         // Otx
-        fordVehiclePublication.Otx = regexFind(
+        fordBookPub.Otx = regexFind(
             new Regex(@"otx\s*:\s*('|"")(.*)\1", RegexOptions.IgnoreCase),
             2
         );
 
-        return fordVehiclePublication;
+        return fordBookPub;
     }
 }
