@@ -247,7 +247,8 @@ internal abstract class BulletinCrawlerRequests
 
         var httpClient = new HttpClient(new HttpClientHandler{ AutomaticDecompression = DecompressionMethods.All, AllowAutoRedirect = false});
         var response = await httpClient.SendAsync(request);
-        while (response.StatusCode == HttpStatusCode.Redirect)
+        var doContinue = true;
+        while (doContinue && response.StatusCode == HttpStatusCode.Redirect)
         {
             var nextUri = response.Headers.Location;
             if (nextUri == null)
@@ -256,11 +257,20 @@ internal abstract class BulletinCrawlerRequests
             }
             var baseUrl = request.RequestUri?.GetLeftPart(UriPartial.Authority);
             var url2 = nextUri.IsAbsoluteUri ? nextUri.OriginalString : baseUrl + nextUri.OriginalString;
+            Console.WriteLine($"Redirecting to {url2}");
 
             using var nextRequest = await request.CloneAsync();
             nextRequest.RequestUri = new Uri(url2);
 
-            response = await httpClient.SendAsync(nextRequest);
+            try
+            {
+                response = await httpClient.SendAsync(nextRequest);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Redirect failed: {e.Message}");
+                doContinue = false;
+            }
         }
 
         response.EnsureSuccessStatusCode();
