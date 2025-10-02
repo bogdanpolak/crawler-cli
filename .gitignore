@@ -1,0 +1,6 @@
+.idea
+browser
+.DS_Store
+bin
+obj
+*.user
