@@ -4,3 +4,4 @@ browser
 bin
 obj
 *.user
+httpResponses
