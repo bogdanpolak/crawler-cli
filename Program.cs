@@ -77,14 +77,6 @@ internal abstract class BookCrawlerRequests
         request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
-        request.Headers.Add("Sec-Fetch-Dest", "empty");
-        request.Headers.Add("Sec-Fetch-Mode", "cors");
-        request.Headers.Add("Sec-Fetch-Site", "same-origin");
-        request.Headers.Add("Priority", "u=0");
-        request.Headers.Add("TE", "trailers");
-        request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-        // request.Headers.Add("x-dtpc", "25$116129126_957h19vMPDOKWQCMCRQAEAFKKAVAVFPVDCQPAMK-0e0");
-        request.Headers.Add("x-dtreferer", "https://www.fordtechservice.dealerconnection.com/");
         request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/Home/VehicleMenu");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
@@ -111,12 +103,6 @@ internal abstract class BookCrawlerRequests
         request.Headers.Add("Connection", "keep-alive");
         request.Headers.Add("Upgrade-Insecure-Requests", "1");
         request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
-        request.Headers.Add("Sec-Fetch-Dest", "iframe");
-        request.Headers.Add("Sec-Fetch-Mode", "navigate");
-        request.Headers.Add("Sec-Fetch-Site", "same-origin");
-        request.Headers.Add("Sec-Fetch-User", "?1");
-        request.Headers.Add("Priority", "u=4");
-        request.Headers.Add("TE", "trailers");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -163,9 +149,6 @@ internal abstract class BookCrawlerRequests
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
         request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
-        request.Headers.Add("Sec-Fetch-Dest", "style");
-        request.Headers.Add("Sec-Fetch-Mode", "no-cors");
-        request.Headers.Add("Sec-Fetch-Site", "same-origin");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
