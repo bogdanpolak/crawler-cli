@@ -83,7 +83,7 @@ internal abstract class BookCrawlerRequests
         request.Headers.Add("Priority", "u=0");
         request.Headers.Add("TE", "trailers");
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-        request.Headers.Add("x-dtpc", "25$116129126_957h19vMPDOKWQCMCRQAEAFKKAVAVFPVDCQPAMK-0e0");
+        // request.Headers.Add("x-dtpc", "25$116129126_957h19vMPDOKWQCMCRQAEAFKKAVAVFPVDCQPAMK-0e0");
         request.Headers.Add("x-dtreferer", "https://www.fordtechservice.dealerconnection.com/");
         request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/Home/VehicleMenu");
 
