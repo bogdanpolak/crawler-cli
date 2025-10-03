@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Security;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -184,12 +185,6 @@ internal abstract class BulletinCrawlerRequests
         request.Headers.Add("Connection", "keep-alive");
         request.Headers.Add("Upgrade-Insecure-Requests", "1");
         request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
-        request.Headers.Add("Sec-Fetch-Dest", "iframe");
-        request.Headers.Add("Sec-Fetch-Mode", "navigate");
-        request.Headers.Add("Sec-Fetch-Site", "same-origin");
-        request.Headers.Add("Sec-Fetch-User", "?1");
-        request.Headers.Add("Priority", "u=4");
-        request.Headers.Add("TE", "trailers");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -228,7 +223,7 @@ internal abstract class BulletinCrawlerRequests
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
 
-        var httpClient = new HttpClient(new HttpClientHandler{ AutomaticDecompression = DecompressionMethods.All, AllowAutoRedirect = false});
+        using var httpClient = new HttpClient(new HttpClientHandler{ AutomaticDecompression = DecompressionMethods.All, AllowAutoRedirect = false});
         var response = await httpClient.SendAsync(request);
         var doContinue = true;
         while (doContinue && response.StatusCode == HttpStatusCode.Redirect)
@@ -242,12 +237,47 @@ internal abstract class BulletinCrawlerRequests
             var url2 = nextUri.IsAbsoluteUri ? nextUri.OriginalString : baseUrl + nextUri.OriginalString;
             Console.WriteLine($"Redirecting to {url2}");
 
-            using var nextRequest = await request.CloneAsync();
-            nextRequest.RequestUri = new Uri(url2);
+            using var nextRequest = new HttpRequestMessage(HttpMethod.Get, url2);
+            nextRequest.Headers.Add("Host", "www.fordtechservice.dealerconnection.com");
+            nextRequest.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
+            nextRequest.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            nextRequest.Headers.Add("Accept-Language", "en-US,en;q=0.5");
+            nextRequest.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
+            nextRequest.Headers.Add("Connection", "keep-alive");
+            nextRequest.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
 
+            request.Headers.Add("Cookie", CookieProvider.Get());
+            request.Version = HttpVersion.Version20;
+
+
+            var handler = new HttpClientHandler{ AutomaticDecompression = DecompressionMethods.All, AllowAutoRedirect = false};
+
+            handler.ServerCertificateCustomValidationCallback =
+                (message, cert, chain, errors) =>
+                {
+                    // Log the certificate details for debugging
+                    Console.WriteLine($"Certificate Subject: {cert?.Subject}");
+                    Console.WriteLine($"Certificate Issuer: {cert?.Issuer}");
+                    Console.WriteLine($"SSL Errors: {errors}");
+
+                    // Custom validation logic
+                    if (errors == SslPolicyErrors.None)
+                        return true;
+
+                    if (errors == SslPolicyErrors.RemoteCertificateNameMismatch)
+                    {
+                        // Accept name mismatches for development
+                        Console.WriteLine("Accepting certificate with name mismatch");
+                        return true;
+                    }
+
+                    return false;
+                };
+
+            using var httpClient2 = new HttpClient(handler);
             try
             {
-                response = await httpClient.SendAsync(nextRequest);
+                response = await httpClient2.SendAsync(nextRequest);
             }
             catch (Exception e)
             {
