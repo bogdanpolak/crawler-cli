@@ -26,12 +26,24 @@ Console.WriteLine("[ (Ford Book Crawler) Table of Content ]");
 FordBookPub fordBook = FordBookPub.Parse(vehiclePublicationHtml);
 var url = $"{fordBook.PublicationBookTreeAndCoverBase}" +
           $"?bookTitle={fordBook.BookTitle}&WiringBookTitle={fordBook.WiringBookTitle}";
-var command = Processing.BuildGetTableOfContentCommand(fordBook);
-var tableOfContentHtml = await BookCrawlerRequests.GetBookTableOfContent(url, command);
+var commandGetTableOfContents = Processing.BuildGetTableOfContentCommand(fordBook);
+var tableOfContentHtml = await BookCrawlerRequests.GetBookTableOfContent(url, commandGetTableOfContents);
 Console.WriteLine($"{tableOfContentHtml[ .. 500]}\nLength = {tableOfContentHtml.Length}");
 Utils.SaveToFile(tableOfContentHtml, "03 TableOfContent.html");
 var procedureIds = await Processing.ExtractFordProcedureIds(tableOfContentHtml);
 Console.WriteLine($"OemProcedureIds = [{string.Join(", ", procedureIds.Take(50))}, ...] Length = {procedureIds.Count}");
+
+Console.WriteLine("--------------------------------------------------------------------------");
+Console.WriteLine("[ (Ford Book Crawler) Procedure HTML ]");
+var procedureId = procedureIds[100];
+var procedureHtml1 = await BookCrawlerRequests.GetProcedureHtml(fordBook.PublicationProcContentBase, Processing.BuildGetProcedureHtmlCommand(fordBook, procedureId));
+Console.WriteLine($"{procedureHtml1[ .. 500]}\nLength = {procedureHtml1.Length}");
+Utils.SaveToFile(procedureHtml1, $"04 Procedure {procedureId}.html");
+procedureId = procedureIds[111];
+var procedureHtml2 = await BookCrawlerRequests.GetProcedureHtml(fordBook.PublicationProcContentBase, Processing.BuildGetProcedureHtmlCommand(fordBook, procedureId));
+Console.WriteLine($"{procedureHtml2[ .. 500]}\nLength = {procedureHtml2.Length}");
+Utils.SaveToFile(procedureHtml2, $"04 Procedure {procedureId}.html");
+
 
 Console.WriteLine("--------------------------------------------------------------------------");
 Console.WriteLine("[ (Ford Book Crawler) Procedure Css ]");
@@ -41,8 +53,8 @@ var cssLoader = await BookCrawlerRequests.GetCssAsync(
     "https://www.fordtechservice.dealerconnection.com/Content/Loader.css");
 Console.WriteLine($"{cssDesktop[ .. 100]}\nLength = {cssDesktop.Length}");
 Console.WriteLine($"{cssLoader[ .. 100]}\nLength = {cssLoader.Length}");
-Utils.SaveToFile(cssDesktop, "04 pts.desktop.publications.css");
-Utils.SaveToFile(cssDesktop, "04 Loader.css");
+Utils.SaveToFile(cssDesktop, "05 pts.desktop.publications.css");
+Utils.SaveToFile(cssDesktop, "05 Loader.css");
 
 
 Console.WriteLine("\n--------------------------------------------------------------------------");
@@ -67,18 +79,19 @@ Utils.SaveToFile(bulletinHtml, $"12 bulletin-{bulletinId}.html");
 internal abstract class BookCrawlerRequests
 {
     private const string FordTechServiceUrl = "https://www.fordtechservice.dealerconnection.com";
+    private const string FordTechDomain = "www.fordtechservice.dealerconnection.com";
 
     public static async Task<string> GetVehicles(string modelId)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"{FordTechServiceUrl}/VehicleId/LoadVehicleIDByYearmodel?vehicleId={modelId}");
 
-        request.Headers.Add("Host", "www.fordtechservice.dealerconnection.com");
+        request.Headers.Add("Host", FordTechDomain);
         request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
         request.Headers.Add("Accept", "application/json, text/javascript, */*; q=0.01");
         request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
-        request.Headers.Add("Referer", FordTechServiceUrl);
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -96,13 +109,13 @@ internal abstract class BookCrawlerRequests
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-        request.Headers.Add("Host", "www.fordtechservice.dealerconnection.com");
+        request.Headers.Add("Host", FordTechDomain);
         request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
         request.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
-        request.Headers.Add("Referer", FordTechServiceUrl);
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -118,7 +131,29 @@ internal abstract class BookCrawlerRequests
     public static async Task<string> GetBookTableOfContent(string url, string commandJson)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        request.Headers.Add("Referer", FordTechServiceUrl);
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
+        request.Headers.Add("Accept", "*/*");
+        request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
+        request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
+        request.Headers.Add("Connection", "keep-alive");
+        request.Headers.Add("Accept-Encoding", "*");
+        request.Content = new StringContent(commandJson, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
+
+        request.Headers.Add("Cookie", CookieProvider.Get());
+        request.Version = HttpVersion.Version20;
+
+        var httpClient = new HttpClient();
+        var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+
+        return content;
+    }
+
+    public static async Task<string> GetProcedureHtml(string url, string commandJson)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
         request.Headers.Add("Accept", "*/*");
         request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
         request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
@@ -141,13 +176,13 @@ internal abstract class BookCrawlerRequests
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-        request.Headers.Add("Host", "www.fordtechservice.dealerconnection.com");
+        request.Headers.Add("Host", FordTechDomain);
         request.Headers.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0");
         request.Headers.Add("Accept", "text/css,*/*;q=0.1");
         request.Headers.Add("Accept-Language", "en-US,en;q=0.5");
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
-        request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -182,7 +217,7 @@ internal abstract class BulletinCrawlerRequests
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
         request.Headers.Add("Upgrade-Insecure-Requests", "1");
-        request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
 
         request.Headers.Add("Cookie", CookieProvider.Get());
         request.Version = HttpVersion.Version20;
@@ -210,7 +245,8 @@ internal abstract class BulletinCrawlerRequests
         request.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
         request.Headers.Add("Connection", "keep-alive");
         request.Headers.Add("Upgrade-Insecure-Requests", "1");
-        request.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
+        request.Headers.Add("Referer", $"{FordTechServiceUrl}/");
+
         request.Headers.Add("Sec-Fetch-Dest", "iframe");
         request.Headers.Add("Sec-Fetch-Mode", "navigate");
         request.Headers.Add("Sec-Fetch-Site", "same-origin");
@@ -242,7 +278,7 @@ internal abstract class BulletinCrawlerRequests
             nextRequest.Headers.Add("Accept-Language", "en-US,en;q=0.5");
             nextRequest.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
             nextRequest.Headers.Add("Connection", "keep-alive");
-            nextRequest.Headers.Add("Referer", "https://www.fordtechservice.dealerconnection.com/");
+            nextRequest.Headers.Add("Referer", $"{FordTechServiceUrl}/");
 
             request.Headers.Add("Cookie", CookieProvider.Get());
             request.Version = HttpVersion.Version20;
@@ -251,7 +287,7 @@ internal abstract class BulletinCrawlerRequests
             var handler = new HttpClientHandler{ AutomaticDecompression = DecompressionMethods.All, AllowAutoRedirect = false};
 
             handler.ServerCertificateCustomValidationCallback =
-                (message, cert, chain, errors) =>
+                (_, cert, _, errors) =>
                 {
                     // Log the certificate details for debugging
                     Console.WriteLine($"Certificate Subject: {cert?.Subject}");
@@ -317,6 +353,42 @@ internal abstract class Processing
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
+        return json;
+    }
+
+    public static string BuildGetProcedureHtmlCommand(FordBookPub book, string oemProcedureId)
+    {
+        var command = new
+        {
+            book.VehicleId,
+            book.ModelYear,
+            Channel = book.ChannelId,
+            Book = book.BookCode,
+            book.BookType,
+            book.BookTitle,
+            book.Country,
+            book.Language,
+            book.ContentMarket,
+            book.ContentLanguage,
+            book.LanguageOdysseyCode,
+            SearchNumber = oemProcedureId,
+            // additional fields (can be omitted)
+            LinkType = "Procedure",
+            book.IsMobile,
+            book.UserType,
+            book.Category,
+            book.Adt,
+            book.DiagTool,
+            book.Otx,
+            FromPageBase = book.Origin,
+            book.WiringBookCode,
+            book.WiringBookTitle
+        };
+        var json = JsonSerializer.Serialize(command, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
         return json;
     }
 
